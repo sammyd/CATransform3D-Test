@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		223E277B17527C36008B8B0D /* PointView.m in Sources */ = {isa = PBXBuildFile; fileRef = 223E277A17527C36008B8B0D /* PointView.m */; };
 		F8952BE016C1FA9400C5A798 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8952BDF16C1FA9400C5A798 /* UIKit.framework */; };
 		F8952BE216C1FA9400C5A798 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8952BE116C1FA9400C5A798 /* Foundation.framework */; };
 		F8952BE416C1FA9500C5A798 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8952BE316C1FA9400C5A798 /* CoreGraphics.framework */; };
@@ -37,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		223E277917527C36008B8B0D /* PointView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PointView.h; sourceTree = "<group>"; };
+		223E277A17527C36008B8B0D /* PointView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PointView.m; sourceTree = "<group>"; };
 		F8952BDC16C1FA9400C5A798 /* CATransform3DTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CATransform3DTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8952BDF16C1FA9400C5A798 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		F8952BE116C1FA9400C5A798 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -129,6 +132,8 @@
 				F8952C1516C1FAA000C5A798 /* DemoViewController.m */,
 				F8CAB11316C2AA5F00EF1BC1 /* GridView.h */,
 				F8CAB11416C2AA5F00EF1BC1 /* GridView.m */,
+				223E277917527C36008B8B0D /* PointView.h */,
+				223E277A17527C36008B8B0D /* PointView.m */,
 			);
 			path = CATransform3DTest;
 			sourceTree = "<group>";
@@ -279,6 +284,7 @@
 				F8952BF016C1FA9500C5A798 /* AppDelegate.m in Sources */,
 				F8952C1616C1FAA000C5A798 /* DemoViewController.m in Sources */,
 				F8CAB11516C2AA5F00EF1BC1 /* GridView.m in Sources */,
+				223E277B17527C36008B8B0D /* PointView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

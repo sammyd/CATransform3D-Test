@@ -10,6 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #import "GridView.h"
+#import "PointView.h"
 
 static char const * const maxValueTagKey = "maxValueTagKey";
 
@@ -34,6 +35,7 @@ static char const * const maxValueTagKey = "maxValueTagKey";
 
 @interface DemoViewController ()
 @property (nonatomic, weak) GridView *gridView;
+@property (nonatomic, strong) PointView *pointView;
 @property (nonatomic, weak) UIView *matrixBoxView;
 @property (nonatomic, weak) UISlider *sliderView, *xRotationSliderView, *yRotationSliderView, *zRotationSliderView;
 @property (nonatomic, weak) UILabel *xRotationLabel, *yRotationLabel, *zRotationLabel;
@@ -42,6 +44,7 @@ static char const * const maxValueTagKey = "maxValueTagKey";
 @property (nonatomic, assign) float initialM14Value, initialM24Value;
 @property (nonatomic, assign) float initialXScale, initialYScale;
 @property (nonatomic, strong) UISlider *xAnchorSliderView, *yAnchorSliderView;
+
 @end
 
 @implementation DemoViewController
@@ -65,6 +68,9 @@ static char const * const maxValueTagKey = "maxValueTagKey";
     GridView *gridView = [[GridView alloc] initWithFrame:CGRectMake(([self.view bounds].size.width-300)/2, 50, 301, 301)];
     [self.view addSubview:gridView];
     self.gridView = gridView;
+    
+    self.pointView = [[PointView alloc] initWithFrame:self.gridView.frame];
+    [self.view addSubview:self.pointView];
     
     UIView *matrixBoxView = [[UIView alloc] initWithFrame:CGRectMake(([self.view bounds].size.width-500)/2, 520, 500, 180)];
     matrixBoxView.backgroundColor = [UIColor clearColor];
@@ -361,6 +367,85 @@ static char const * const maxValueTagKey = "maxValueTagKey";
     //CATransform3D concatenatedTransformation = CATransform3DConcat(xRotation, transformation);
     
     self.gridView.layer.transform = concatenatedTransformation;
+    CATransform3D newTransform = concatenatedTransformation;
+    newTransform.m43 += 1;
+    self.pointView.layer.transform = newTransform;
+    
+    CATransform3D c = concatenatedTransformation;
+    NSLog(@"===========================");
+    NSLog(@"%.2f, %.2f, %.2f, %.2f", c.m11, c.m12, c.m13, c.m14);
+    NSLog(@"%.2f, %.2f, %.2f, %.2f", c.m21, c.m22, c.m23, c.m24);
+    NSLog(@"%.2f, %.2f, %.2f, %.2f", c.m31, c.m32, c.m33, c.m34);
+    NSLog(@"%.2f, %.2f, %.2f, %.2f", c.m41, c.m42, c.m43, c.m44);
+    
+    //c.m43 = 0;
+    
+    //===== 1. Map the points =====//
+    CGFloat bl[3] = { -c.m11 - c.m21 + c.m41, -c.m12 - c.m22 + c.m42, - c.m13 - c.m23 + c.m43};
+    CGFloat tl[3] = { -c.m11 + c.m21 + c.m41, -c.m12 + c.m22 + c.m42, - c.m13 + c.m23 + c.m43};
+    CGFloat tr[3] = {  c.m11 + c.m21 + c.m41,  c.m12 + c.m22 + c.m42,   c.m13 + c.m23 + c.m43};
+    // Need to scale by the perspective factor
+    for(int i=0; i<3; i++) {
+        bl[i] = bl[i] / (- c.m14 - c.m24 + c.m44);
+        tl[i] = tl[i] / (- c.m14 + c.m24 + c.m44);
+        tr[i] = tr[i] / (+ c.m14 + c.m24 + c.m44);
+    }
+    
+    
+    //===== 2. Calculate the edge vectors =====//
+    CGFloat ev1[3];
+    CGFloat ev2[3];
+    for(int i=0; i<3; i++) {
+        ev1[i] = tl[i] - bl[i];
+        ev2[i] = tr[i] - tl[i];
+    }
+    
+    //===== 3. Cross product to find the normal =====//
+    CGFloat crossProduct[3];
+    crossProduct[0] = ev1[1] * ev2[2] - ev1[2] * ev2[1];
+    crossProduct[1] = ev1[0] * ev2[2] - ev1[2] * ev1[0];
+    crossProduct[2] = ev1[0] * ev2[1] - ev1[1] * ev2[0];    
+    
+    //===== 4. Dot product with one of the transformed points =====//
+    
+    CGFloat vectToCamera[3] = { tr[0] - c.m14, tr[1] - c.m24, tr[2] - c.m34 };
+    
+    CGFloat dotProduct = 0;
+    
+    for(int i=0; i<3; i++) {
+        dotProduct += crossProduct[i] * vectToCamera[i];
+    }
+    
+    
+    
+    /* Start Again */
+    dotProduct = 0;
+    CGFloat originMapped[3] = { c.m41, c.m42, c.m43 };
+    CGFloat zUnitMapped[3]  = { c.m31 + c.m41, c.m32 + c.m42, c.m33 + c.m43 };
+    for (int i=0; i<3; i++) {
+        originMapped[i] /= c.m44;
+        zUnitMapped[i] /= (c.m34 + c.m44);
+    }
+    
+    CGFloat normal[3];
+    CGFloat camera[3] = { 0, 0, -1 / c.m34 };
+    CGFloat cameraOffset[3];
+    for (int i=0; i<3; i++) {
+        normal[i] = zUnitMapped[i] - originMapped[i];
+        cameraOffset[i] = camera[i] - originMapped[i];
+        dotProduct += normal[i] * originMapped[i];
+    }
+    
+     
+    NSLog(@"DotProduct: %.2f", dotProduct);
+    
+    if(dotProduct < 0) {
+        self.gridView.backgroundColor = [UIColor redColor];
+    } else {
+        self.gridView.backgroundColor = [UIColor greenColor];
+    }
+    
+    
 }
 
 - (void)onViewPanned:(UIPanGestureRecognizer*)gesture
